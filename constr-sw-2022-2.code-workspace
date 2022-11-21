@@ -2,6 +2,27 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "frontend"
+		},
+		{
+			"path": "backend/aulas"
+		},
+		{
+			"path": "backend/disciplinas"
+		},
+		{
+			"path": "backend/recursos"
+		},
+		{
+			"path": "backend/reservas"
+		},
+		{
+			"path": "backend/salas"
+		},
+		{
+			"path": "backend/turmas"
 		}
 	],
 	"settings": {}
