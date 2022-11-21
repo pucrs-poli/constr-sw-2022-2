@@ -105,7 +105,7 @@ services:
   # grupo7
   classes-api:
     container_name: classes-api
-    build: ./classes-ms
+    build: ./backend/classes/classes-ms
     environment:
       - SERVER_PORT=8092
     ports:
