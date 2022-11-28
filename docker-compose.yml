@@ -64,7 +64,7 @@ services:
   # grupo1: PRÉDIOS E SALAS
   buildings-api:
     container_name: buildings-api
-    build: ./backend/buildings
+    build: ./backend/buildings/buildings-classrooms
     environment:
       - API_PORT=8081
       - KEYCLOAK_API_HOST=host.docker.internal
@@ -80,7 +80,7 @@ services:
   # grupo2: RECURSOS
   resources-api:
     container_name: resources-api
-    build: ./backend/resources
+    build: ./backend/resources/resources-api
     environment:
       - DB_HOST=postgresql
       - DB_PORT=5432
@@ -95,7 +95,7 @@ services:
   # grupo3: RESERVAS
   reservations-api:
     container_name: reservations-api
-    build: ./backend/reservations
+    build: ./backend/reservations/reservations-api
     ports:
       - 8083:8083
     environment:
