@@ -1,18 +1,18 @@
 [submodule "salas"]
 	path = backend/salas
 	url = https://github.com/pucrs-poli/constr-sw-2022-2-g1
-[submodule "recursos"]
-	path = backend/recursos
+[submodule "resources"]
+	path = backend/resources
 	url = https://github.com/pucrs-poli/constr-sw-2022-2-g2
-[submodule "reservas"]
-	path = backend/reservas
+[submodule "reservations"]
+	path = backend/reservations
 	url = https://github.com/pucrs-poli/constr-sw-2022-2-g3
-[submodule "turmas"]
-	path = backend/turmas
+[submodule "classes"]
+	path = backend/classes
 	url = https://github.com/pucrs-poli/constr-sw-2022-2-g5
-[submodule "disciplinas"]
-	path = backend/disciplinas
+[submodule "courses"]
+	path = backend/courses
 	url = https://github.com/pucrs-poli/constr-sw-2022-2-g6
-[submodule "aulas"]
-	path = backend/aulas
+[submodule "lessons"]
+	path = backend/lessons
 	url = https://github.com/pucrs-poli/constr-sw-2022-2-g7
