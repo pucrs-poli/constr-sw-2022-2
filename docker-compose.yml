@@ -52,9 +52,11 @@ services:
     build: ./auth
     environment:
       - KEYCLOAK_PORT=8090
-      - AUTH_SERVER_PORT=8091
+      - KEYCLOAK_CLIENT_ID=grupo7
+      - KEYCLOAK_CLIENT_SECRET=HjTtaSOS39LaQ62HcUC1hZo6CC16q3f2
+      - AUTH_SERVER_PORT=8080
     ports:
-      - "8091:8091"
+      - 8080:8080
     networks:
       - constr-sw-2022-2
     depends_on:
@@ -140,10 +142,14 @@ services:
     build: ./backend/lessons/classes-ms
     environment:
       - SERVER_PORT=8080
-      - DB_HOST=postgresql
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=a12345678
+      - SWAGGER_CUSTOM_SERVER=https://8092-pucrspoli-constrsw20222-5uwu1stt2g9.ws-us77.gitpod.io
+      - POSTGRES_HOST=postgresql
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=a12345678
+      - SERVICE_ROOMS_MOCKED=false
+      - SERVICE_GROUPS_MOCKED=true
+      - SERVICE_RESERVATIONS_MOCKED=false
     ports:
       - 8087:8080
     networks:
