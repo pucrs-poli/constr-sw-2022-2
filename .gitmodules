@@ -1,5 +1,5 @@
-[submodule "salas"]
-	path = backend/salas
+[submodule "buildings"]
+	path = backend/buildings
 	url = https://github.com/pucrs-poli/constr-sw-2022-2-g1
 [submodule "resources"]
 	path = backend/resources
