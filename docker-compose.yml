@@ -9,25 +9,22 @@ volumes:
   postgresql-data:
     external: true
 services:
-  keycloak:
-    container_name: keycloak
-    image: jboss/keycloak:latest
+  postgresql:
+    container_name: postgresql
+    image: postgres:latest
     ports:
-      - 8080:8080
+      - 5432:5432
     environment:
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=a12345678
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=a12345678
     volumes:
-      - keycloak-data:/opt/jboss/keycloak/standalone/data
+      - postgresql-data:/var/lib/postgresql/data
     networks:
       - constr-sw-2022-2
-  # keycloak-api:
-    # container_name: keycloak-api
-    # ...
-    # depends_on:
-    #   - keycloak
-  mongo:
-    container_name: mongo
+  mongodb:
+    container_name: mongodb
     image: mongo:latest
     ports:
       - 27017:27017
@@ -38,52 +35,136 @@ services:
       - mongodb-data:/data/mongodb
     networks:
       - constr-sw-2022-2
-  postgresql:
-    container_name: postgresql
-    image: postgres:latest
+  keycloak:
+    container_name: keycloak
+    image: jboss/keycloak:latest
     ports:
-      - 5432:5432
+      - 8090:8080
     environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust
-      - PGDATA=/var/lib/postgresql/data/pgdata
-      - POSTGRES_PASSWORD=a12345678
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=a12345678
     volumes:
-      - postgresql-data:/var/lib/postgresql/data
+      - keycloak-data:/opt/jboss/keycloak/standalone/data
     networks:
       - constr-sw-2022-2
-  # {api}-api:
-    # container-name: {api}-api
-    # ...
-    # depends_on:
-    #   - keycloak-api
-    #   - mongodb OU postgresql
-  # grupo1
-  # predios-api:
-      # ports:
-      #   - 8081:???
-  # grupo2
-  # recursos-api:
-      # ports:
-      #   - 8082:???
-  # grupo3
-  # reservas-api:
-    # container-name: {api}-api
-    # ...
-      # ports:
-      #   - 8083:???
-    # depends_on:
-    #   - keycloak-api
-    #   - mongodb OU postgresql
-    #   - recursos-api
-  # grupo5
-  # turmas-api:
-      # ports:
-      #   - 8085:???
-  # grupo6
-  # disciplinas-api:
-      # ports:
-      #   - 8086:???
-  # grupo7
-  # aulas-api:
-      # ports:
-      #   - 8087:???
+  auth:
+    container_name: auth
+    build: ./auth
+    environment:
+      - KEYCLOAK_PORT=8090
+      - AUTH_SERVER_PORT=8091
+    ports:
+      - "8091:8091"
+    networks:
+      - constr-sw-2022-2
+    depends_on:
+      - keycloak
+  # grupo1: PRÉDIOS E SALAS
+  buildings-api:
+    container_name: buildings-api
+    build: ./backend/buildings
+    environment:
+      - API_PORT=8081
+      - KEYCLOAK_API_HOST=host.docker.internal
+      - KEYCLOAK_API_PORT=3000
+      - DB_HOST=mongodb
+      - DB_PORT=27017
+      - DB_USER=admin
+      - DB_PASSWORD=a12345678
+    networks:
+      - constr-sw-2022-2
+    depends_on:
+      - mongodb
+  # grupo2: RECURSOS
+  resources-api:
+    container_name: resources-api
+    build: ./backend/resources
+    environment:
+      - DB_HOST=postgresql
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=a12345678
+    ports:
+      - 8082:8082
+    networks:
+      - constr-sw-2022-2
+    depends_on:
+      - postgresql
+  # grupo3: RESERVAS
+  reservations-api:
+    container_name: reservations-api
+    build: ./backend/reservations
+    ports:
+      - 8083:8083
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgresql
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=a12345678
+    networks:
+      - constr-sw-2022-2
+    depends_on:
+      - postgresql
+  # grupo5: TURMAS
+  classes-api:
+    container_name: classes-api
+    build: ./backend/classes
+    environment:
+      - DB_HOST=mongodb
+      - DB_PORT=27017
+      - DB_USER=admin
+      - DB_PASSWORD=a12345678
+    ports:
+      - 8085:8085
+    networks:
+      - constr-sw-2022-2
+    depends_on:
+      - mongodb
+  # grupo6: DISCIPLINAS
+  courses-api:
+    container_name: courses-api
+    build: ./backend/courses
+    environment:
+      - DB_HOST=mongodb
+      - DB_PORT=27017
+      - DB_USER=admin
+      - DB_PASSWORD=a12345678
+    ports:
+      - 8086:8086
+    depends_on:
+      - mongodb
+  # grupo7: AULAS
+  lessons-api:
+    container_name: lessons-api
+    build: ./backend/lessons/classes-ms
+    environment:
+      - SERVER_PORT=8080
+      - DB_HOST=postgresql
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=a12345678
+    ports:
+      - 8087:8080
+    networks:
+      - constr-sw-2022-2
+    depends_on:
+      - postgresql
+  # frontend
+  frontend:
+    container_name: frontend
+    build: ./frontend/build
+    environment:
+      - ENV_NAME=production
+    ports:
+      - 80:3000
+    networks:
+      - constr-sw-2022-2
+    depends_on:
+      - auth
+      - buildings-api
+      - resources-api
+      - reservations-api
+      - classes-api
+      - courses-api
+      - lessons-api
