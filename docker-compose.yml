@@ -107,9 +107,9 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=a12345678
-      - KEYCLOAK_API_SERVER_URL=http://keycloak-api:3000
+      - KEYCLOAK_API_SERVER_URL=http://auth:3000
       - RESOURCES_API_SERVER_URL=http://resources-api:8082
-      - RESOURCES_API_MOCK=true
+      - RESOURCES_API_MOCK=false
     networks:
       - constr-sw-2022-2
     depends_on:
