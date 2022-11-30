@@ -19,3 +19,6 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/pucrs-poli/constr-sw-2022-2-front.git
+[submodule "auth"]
+	path = backend/auth
+	url = https://github.com/pucrs-poli/constr-sw-2022-2-auth
