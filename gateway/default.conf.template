@@ -28,7 +28,7 @@ server {
     }
 
     # Buildings api is responsible for buildings AND classrooms (salas) !!!
-    location ~ ^/api/classroom(/?)(.*)$ {
+    location ~ ^/api/classrooms(/?)(.*)$ {
         set $target http://buildings-api:8081/classroom/$2;
         proxy_pass $target;
     }

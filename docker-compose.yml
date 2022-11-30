@@ -168,6 +168,10 @@ services:
       - SERVICE_ROOMS_MOCKED=false
       - SERVICE_GROUPS_MOCKED=true
       - SERVICE_RESERVATIONS_MOCKED=false
+      - CLIENT_AUTH_URL=http://gateway:80
+      - CLIENT_ROOMS_URL=http://gateway:80/classrooms
+      - CLIENT_RESERVATIONS_URL=http://gateway:80/reservations
+      - CLIENT_GROUPS_URL=http://gateway:80/groups
     ports:
       - 8087:8080
     networks:
