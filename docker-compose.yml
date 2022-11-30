@@ -51,9 +51,10 @@ services:
       - -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.file=/tmp/realm.json -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
     networks:
       - constr-sw-2022-2
-  auth:
-    container_name: auth
-    build: ./backend/lessons/auth
+  # grupo7: auth 
+  auth-api:
+    container_name: auth-api
+    build: ./backend/auth
     environment:
       - CLIENT_KEYCLOAK_URL=http://keycloak:8080/auth
       - KEYCLOAK_CLIENT_ID=grupoX
@@ -178,23 +179,8 @@ services:
       - constr-sw-2022-2
     depends_on:
       - postgresql
-  # frontend
-  frontend:
-    container_name: frontend
-    build: ./frontend
-    environment:
-      - PORT=80
-      - ENV_NAME=production
-    networks:
-      - constr-sw-2022-2
-#    depends_on:
-#      - auth
-#      - buildings-api
-#      - resources-api
-#      - reservations-api
-#      - classes-api
-#      - courses-api
-#      - lessons-api
+
+  # gateway
   gateway:
     container_name: gateway
     image: nginx:alpine
@@ -204,13 +190,23 @@ services:
       - 80:80
     networks:
       - constr-sw-2022-2
-#    depends_on:
-#      - auth
-#      - buildings-api
-#      - resources-api
-#      - reservations-api
-#      - classes-api
-#      - courses-api
-#      - lessons-api
-#      - frontend
+    depends_on:
+      - auth-api
+      - buildings-api
+      - resources-api
+      - reservations-api
+      - classes-api
+      - courses-api
+      - lessons-api
 
+  # frontend
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    environment:
+      - PORT=80
+      - ENV_NAME=production
+    networks:
+      - constr-sw-2022-2
+    depends_on:
+      - gateway
