@@ -23,6 +23,9 @@
 		},
 		{
 			"path": "backend/lessons"
+		},
+		{
+			"path": "backend/auth"
 		}
 	],
 	"settings": {}
