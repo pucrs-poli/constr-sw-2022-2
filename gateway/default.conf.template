@@ -1,0 +1,56 @@
+resolver 127.0.0.11 ipv6=off valid=5s;
+resolver_timeout 1s;
+
+server {
+    server_name   _;
+    listen        80;
+
+    location ~ ^/api/reservations(/?)(.*)$ {
+        set $target http://reservations-api:8083/reservations/$2;
+        proxy_pass $target;
+    }
+
+    location ~ ^/api/resources(/?)(.*)$ {
+        set $target http://resources-api:8082/resources/$2;
+        proxy_pass $target;
+    }
+
+    # Classes (for some reason is called classroom internally)
+    location ~ ^/api/classes(/?)(.*)$ {
+        set $target http://classes-api:8085/classroom/$2;
+        proxy_pass $target;
+    }
+
+    # Buildings api is responsible for buildings AND classrooms (salas) !!!
+    location ~ ^/api/buildings(/?)(.*)$ {
+        set $target http://buildings-api:8081/building/$2;
+        proxy_pass $target;
+    }
+
+    # Buildings api is responsible for buildings AND classrooms (salas) !!!
+    location ~ ^/api/classrooms(/?)(.*)$ {
+        set $target http://buildings-api:8081/classroom/$2;
+        proxy_pass $target;
+    }
+
+    # Broken api...
+    location ~ ^/api/courses(/?)(.*)$ {
+        set $target http://courses-api:8086/disciplines/$2;
+        proxy_pass $target;
+    }
+
+    location ~ ^/api/lessons(/?)(.*)$ {
+        set $target http://lessons-api:8080/classes/$2;
+        proxy_pass $target;
+    }
+
+    location ~ ^/api(/?)(.*)$ {
+        set $target http://auth:8080/$2;
+        proxy_pass $target;
+    }
+
+    location / {
+        set $target http://frontend:80;
+        proxy_pass $target;
+    }
+}

@@ -16,3 +16,6 @@
 [submodule "lessons"]
 	path = backend/lessons
 	url = https://github.com/pucrs-poli/constr-sw-2022-2-g7
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/pucrs-poli/constr-sw-2022-2-front.git

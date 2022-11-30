@@ -43,17 +43,21 @@ services:
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=a12345678
+#      - KEYCLOAK_FRONTEND_URL=https://8090-vanflux-constrsw20222-v1a20k3n3n8.ws-us77.gitpod.io/auth
     volumes:
       - keycloak-data:/opt/jboss/keycloak/standalone/data
+      - ./Keycloak/constr-sw-2022-2-realm.json:/tmp/realm.json
+    command:
+      - -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.file=/tmp/realm.json -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
     networks:
       - constr-sw-2022-2
   auth:
     container_name: auth
     build: ./backend/lessons/auth
     environment:
-      - KEYCLOAK_PORT=8090
-      - KEYCLOAK_CLIENT_ID=grupo7
-      - KEYCLOAK_CLIENT_SECRET=HjTtaSOS39LaQ62HcUC1hZo6CC16q3f2
+      - CLIENT_KEYCLOAK_URL=http://keycloak:8080/auth
+      - KEYCLOAK_CLIENT_ID=grupoX
+      - KEYCLOAK_CLIENT_SECRET=MZ4EEGhkDYe1nghFmxj4GPimTRPs9OLT
       - AUTH_SERVER_PORT=8080
     ports:
       - 8080:8080
@@ -67,12 +71,13 @@ services:
     build: ./backend/buildings/buildings-classrooms
     environment:
       - API_PORT=8081
-      - KEYCLOAK_API_HOST=host.docker.internal
-      - KEYCLOAK_API_PORT=3000
-      - DB_HOST=mongodb
-      - DB_PORT=27017
-      - DB_USER=admin
-      - DB_PASSWORD=a12345678
+      - KEYCLOAK_API_HOST=auth
+      - KEYCLOAK_API_PORT=8080
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - MONGODB_USER=admin
+    ports:
+      - 8081:8081
     networks:
       - constr-sw-2022-2
     depends_on:
@@ -86,6 +91,8 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=a12345678
+      - SPRING_CONFIG_LOCATION=/app/src/main/resources/application.properties
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/
     ports:
       - 8082:8082
     networks:
@@ -104,6 +111,9 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=a12345678
+      - KEYCLOAK_API_SERVER_URL=http://auth:3000
+      - RESOURCES_API_SERVER_URL=http://resources-api:8082
+      - RESOURCES_API_MOCK=false
     networks:
       - constr-sw-2022-2
     depends_on:
@@ -111,12 +121,15 @@ services:
   # grupo5: TURMAS
   classes-api:
     container_name: classes-api
-    build: ./backend/classes
+    build: ./backend/classes/classrooms
     environment:
-      - DB_HOST=mongodb
-      - DB_PORT=27017
-      - DB_USER=admin
-      - DB_PASSWORD=a12345678
+      - KEYCLOAK_API_HOST=auth
+      - KEYCLOAK_API_PORT=8080
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - MONGODB_USER=admin
+      - MONGODB_PASSWORD=a12345678
+      - API_PORT=8085
     ports:
       - 8085:8085
     networks:
@@ -126,14 +139,19 @@ services:
   # grupo6: DISCIPLINAS
   courses-api:
     container_name: courses-api
-    build: ./backend/courses
+    build: ./backend/courses/disciplines
     environment:
-      - DB_HOST=mongodb
-      - DB_PORT=27017
-      - DB_USER=admin
-      - DB_PASSWORD=a12345678
+      - KEYCLOAK_API_HOST=auth
+      - KEYCLOAK_API_PORT=8080
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - MONGODB_USER=admin
+      - MONGODB_PASSWORD=a12345678
+      - API_PORT=8086
     ports:
       - 8086:8086
+    networks:
+      - constr-sw-2022-2
     depends_on:
       - mongodb
   # grupo7: AULAS
@@ -150,6 +168,10 @@ services:
       - SERVICE_ROOMS_MOCKED=false
       - SERVICE_GROUPS_MOCKED=true
       - SERVICE_RESERVATIONS_MOCKED=false
+      - CLIENT_AUTH_URL=http://gateway:80
+      - CLIENT_ROOMS_URL=http://gateway:80/classrooms
+      - CLIENT_RESERVATIONS_URL=http://gateway:80/reservations
+      - CLIENT_GROUPS_URL=http://gateway:80/groups
     ports:
       - 8087:8080
     networks:
@@ -159,18 +181,36 @@ services:
   # frontend
   frontend:
     container_name: frontend
-    build: ./frontend/build
+    build: ./frontend
     environment:
+      - PORT=80
       - ENV_NAME=production
-    ports:
-      - 80:3000
     networks:
       - constr-sw-2022-2
-    depends_on:
-      - auth
-      - buildings-api
-      - resources-api
-      - reservations-api
-      - classes-api
-      - courses-api
-      - lessons-api
+#    depends_on:
+#      - auth
+#      - buildings-api
+#      - resources-api
+#      - reservations-api
+#      - classes-api
+#      - courses-api
+#      - lessons-api
+  gateway:
+    container_name: gateway
+    image: nginx:alpine
+    volumes:
+      - ./gateway:/etc/nginx/templates
+    ports:
+      - 80:80
+    networks:
+      - constr-sw-2022-2
+#    depends_on:
+#      - auth
+#      - buildings-api
+#      - resources-api
+#      - reservations-api
+#      - classes-api
+#      - courses-api
+#      - lessons-api
+#      - frontend
+
