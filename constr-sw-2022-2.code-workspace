@@ -1,31 +1,40 @@
 {
 	"folders": [
 		{
+			"name": "constr-sw-2022-2",
 			"path": "."
 		},
 		{
+			"name": "frontend",
 			"path": "frontend"
 		},
 		{
+			"name": "auth",
+			"path": "backend/auth"
+		},
+		{
+			"name": "buildings",
 			"path": "backend/buildings"
 		},
 		{
+			"name": "resources",
 			"path": "backend/resources"
 		},
 		{
+			"name": "reservations",
 			"path": "backend/reservations"
 		},
 		{
+			"name": "classes",
 			"path": "backend/classes"
 		},
 		{
+			"name": "courses",
 			"path": "backend/courses"
 		},
 		{
+			"name": "lessons",
 			"path": "backend/lessons"
-		},
-		{
-			"path": "backend/auth"
 		}
 	],
 	"settings": {}
