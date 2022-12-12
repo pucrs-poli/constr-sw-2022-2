@@ -1,14 +1,15 @@
 version: '3.4'
 networks:
-  constr-sw-2022-2:
+  constr-sw:
 volumes:
-  keycloak-data:
+  constr-sw-postgresql-data:
     external: true
-  mongodb-data:
+  constr-sw-mongodb-data:
     external: true
-  postgresql-data:
+  constr-sw-keycloak-data:
     external: true
 services:
+  # PostgreSQL
   postgresql:
     container_name: postgresql
     image: postgres:latest
@@ -20,9 +21,10 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=a12345678
     volumes:
-      - postgresql-data:/var/lib/postgresql/data
+      - constr-sw-postgresql-data:/var/lib/postgresql/data
     networks:
-      - constr-sw-2022-2
+      - constr-sw
+  # MongoDB
   mongodb:
     container_name: mongodb
     image: mongo:latest
@@ -32,9 +34,10 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=a12345678
     volumes:
-      - mongodb-data:/data/mongodb
+      - constr-sw-mongodb-data:/data/mongodb
     networks:
-      - constr-sw-2022-2
+      - constr-sw
+  # Keycloak
   keycloak:
     container_name: keycloak
     image: jboss/keycloak:latest
@@ -43,30 +46,30 @@ services:
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=a12345678
-#      - KEYCLOAK_FRONTEND_URL=https://8090-vanflux-constrsw20222-v1a20k3n3n8.ws-us77.gitpod.io/auth
+      - KEYCLOAK_FRONTEND_URL=https://localhost:8090/auth
     volumes:
-      - keycloak-data:/opt/jboss/keycloak/standalone/data
-      - ./Keycloak/constr-sw-2022-2-realm.json:/tmp/realm.json
+      - constr-sw-keycloak-data:/opt/jboss/keycloak/standalone/data
+      - keycloak/constr-sw-realm.json:/tmp/realm.json
     command:
       - -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.file=/tmp/realm.json -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
     networks:
-      - constr-sw-2022-2
-  # grupo7: auth 
+      - constr-sw
+  # Authentication
   auth-api:
     container_name: auth-api
     build: ./backend/auth
     environment:
-      - CLIENT_KEYCLOAK_URL=http://keycloak:8080/auth
-      - KEYCLOAK_CLIENT_ID=grupoX
+      - CLIENT_KEYCLOAK_URL=http://keycloak:8090/auth
+      - KEYCLOAK_CLIENT_ID=constr-sw
       - KEYCLOAK_CLIENT_SECRET=MZ4EEGhkDYe1nghFmxj4GPimTRPs9OLT
       - AUTH_SERVER_PORT=8080
     ports:
       - 8080:8080
     networks:
-      - constr-sw-2022-2
+      - constr-sw
     depends_on:
       - keycloak
-  # grupo1: PRÉDIOS E SALAS
+  # Buildings
   buildings-api:
     container_name: buildings-api
     build: ./backend/buildings/buildings-classrooms
@@ -80,10 +83,10 @@ services:
     ports:
       - 8081:8081
     networks:
-      - constr-sw-2022-2
+      - constr-sw
     depends_on:
       - mongodb
-  # grupo2: RECURSOS
+  # Resources
   resources-api:
     container_name: resources-api
     build: ./backend/resources/resources-api
@@ -97,10 +100,10 @@ services:
     ports:
       - 8082:8082
     networks:
-      - constr-sw-2022-2
+      - constr-sw
     depends_on:
       - postgresql
-  # grupo3: RESERVAS
+  # Reservations
   reservations-api:
     container_name: reservations-api
     build: ./backend/reservations/reservations-api
@@ -116,10 +119,10 @@ services:
       - RESOURCES_API_SERVER_URL=http://resources-api:8082
       - RESOURCES_API_MOCK=false
     networks:
-      - constr-sw-2022-2
+      - constr-sw
     depends_on:
       - postgresql
-  # grupo5: TURMAS
+  # Classes
   classes-api:
     container_name: classes-api
     build: ./backend/classes/classrooms
@@ -134,10 +137,10 @@ services:
     ports:
       - 8085:8085
     networks:
-      - constr-sw-2022-2
+      - constr-sw
     depends_on:
       - mongodb
-  # grupo6: DISCIPLINAS
+  # Courses
   courses-api:
     container_name: courses-api
     build: ./backend/courses/disciplines
@@ -152,10 +155,10 @@ services:
     ports:
       - 8086:8086
     networks:
-      - constr-sw-2022-2
+      - constr-sw
     depends_on:
       - mongodb
-  # grupo7: AULAS
+  # Lessons
   lessons-api:
     container_name: lessons-api
     build: ./backend/lessons
@@ -176,11 +179,11 @@ services:
     ports:
       - 8087:8080
     networks:
-      - constr-sw-2022-2
+      - constr-sw
     depends_on:
       - postgresql
 
-  # gateway
+  # Gateway
   gateway:
     container_name: gateway
     image: nginx:alpine
@@ -189,7 +192,7 @@ services:
     ports:
       - 80:80
     networks:
-      - constr-sw-2022-2
+      - constr-sw
     depends_on:
       - auth-api
       - buildings-api
@@ -199,7 +202,7 @@ services:
       - courses-api
       - lessons-api
 
-  # frontend
+  # Frontend
   frontend:
     container_name: frontend
     build: ./frontend
@@ -207,6 +210,6 @@ services:
       - PORT=80
       - ENV_NAME=production
     networks:
-      - constr-sw-2022-2
+      - constr-sw
     depends_on:
       - gateway
